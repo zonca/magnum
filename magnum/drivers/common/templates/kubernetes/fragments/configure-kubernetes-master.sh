@@ -408,7 +408,29 @@ sed -i '
     /^KUBE_CONTROLLER_MANAGER_ARGS=/ s#\(KUBE_CONTROLLER_MANAGER_ARGS\).*#\1="'"${KUBE_CONTROLLER_MANAGER_ARGS}"'"#
 ' /etc/kubernetes/controller-manager
 
-sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true"/' /etc/kubernetes/scheduler
+KUBE_SCHEDULER_POLICY=/etc/kubernetes/scheduler-policy.json
+sed -i "/^KUBE_SCHEDULER_ARGS=/ s/=.*/='--leader-elect=true --policy-config-file=${KUBE_SCHEDULER_POLICY}'/" /etc/kubernetes/scheduler
+
+cat << EOF >> ${KUBE_SCHEDULER_POLICY}
+{
+"kind" : "Policy",
+"apiVersion" : "v1",
+"predicates" : [
+    {"name" : "PodFitsHostPorts"},
+    {"name" : "PodFitsResources"},
+    {"name" : "NoDiskConflict"},
+    {"name" : "MatchNodeSelector"},
+    {"name" : "HostName"}
+    ],
+"priorities" : [
+    {"name" : "LeastRequestedPriority", "weight" : 1},
+    {"name" : "BalancedResourceAllocation", "weight" : 1},
+    {"name" : "ServiceSpreadingPriority", "weight" : 1},
+    {"name" : "EqualPriority", "weight" : 1}
+    ],
+"hardPodAffinitySymmetricWeight" : 10
+}
+EOF
 
 $ssh_cmd mkdir -p /etc/kubernetes/manifests
 KUBELET_ARGS="--register-node=true --pod-manifest-path=/etc/kubernetes/manifests --hostname-override=${INSTANCE_NAME}"
