@@ -29,6 +29,7 @@ monitor-timeout=30s
 monitor-max-retries=3
 [BlockStorage]
 bs-version=v2
+ignore-volume-az=yes
 EOF
 
     # Provide optional region parameter if it's set.
