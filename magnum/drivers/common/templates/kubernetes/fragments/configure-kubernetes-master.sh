@@ -409,7 +409,7 @@ sed -i '
 ' /etc/kubernetes/controller-manager
 
 KUBE_SCHEDULER_POLICY=/etc/kubernetes/scheduler-policy.json
-sed -i "/^KUBE_SCHEDULER_ARGS=/ s/=.*/='--leader-elect=true --policy-config-file=${KUBE_SCHEDULER_POLICY}'/" /etc/kubernetes/scheduler
+sed -i '/^KUBE_SCHEDULER_ARGS=/ s/=.*/="--leader-elect=true --policy-config-file=\/etc\/kubernetes\/scheduler-policy.json"/' /etc/kubernetes/scheduler
 
 cat << EOF >> ${KUBE_SCHEDULER_POLICY}
 {
